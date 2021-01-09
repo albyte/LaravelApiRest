@@ -42,7 +42,7 @@ PW  admin
 
 ```bash
 docker-compose exec http php vendor/bin/openapi \
-       app/Http/Controllers/swagger-api.php \
+       app/Http/Controllers \
        -o docs/openapi.yaml
 ```
 
