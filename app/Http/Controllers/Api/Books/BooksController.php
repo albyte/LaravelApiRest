@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api\Books;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Books\BookRequest;
-use Exception;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use App\Http\Resources\BookResource;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use App\Book;
+use App\Models\Book;
 
 class BooksController extends Controller
 {
@@ -45,13 +45,7 @@ class BooksController extends Controller
      */
     public function index()
     {
-        $books = (new Book)->paginate(10);
-
-        if (!$books) {
-            throw new HttpException(400, "Invalid data");
-        }
-
-        return response()->json(['books' => $books], 200);
+        return BookResource::collection(Book::paginate(25));
     }
 
     /**
@@ -90,13 +84,12 @@ class BooksController extends Controller
         try {
             $book = new Book;
             $book->fill($request->validated())->save();
-        } catch (Exception $exception) {
-            throw new HttpException(400, "Invalid data - {$exception->getMessage()}");
-        }
 
-        return response()->json([
-            'book' => $book,
-        ], 201);
+            return new BookResource($book);
+
+        } catch(\Exception $exception) {
+            throw new HttpException(400, "Invalid data - {$exception->getMessage}");
+        }
     }
 
     /**
@@ -134,15 +127,9 @@ class BooksController extends Controller
      */
     public function show($id)
     {
-        if (!$id) {
-            throw new HttpException(400, "Invalid id");
-        }
+        $book = Book::findOrfail($id);
 
-        $book = (new Book)->find($id);
-
-        return response()->json([
-            'book' => $book,
-        ], 200);
+        return new BookResource($book);
     }
 
     /**
@@ -194,15 +181,14 @@ class BooksController extends Controller
         }
 
         try {
-            $book = (new Book)->find($id);
-            $book->fill($request->validated())->save();
-        } catch (Exception $exception) {
-            throw new HttpException(400, "Invalid data - {$exception->getMessage()}");
-        }
+           $book = Book::find($id);
+           $book->fill($request->validated())->save();
 
-        return response()->json([
-            'book' => $book,
-        ], 200);
+           return new BookResource($book);
+
+        } catch(\Exception $exception) {
+           throw new HttpException(400, "Invalid data - {$exception->getMessage}");
+        }
     }
 
     /**
@@ -241,14 +227,9 @@ class BooksController extends Controller
      */
     public function destroy($id)
     {
-        if (!$id) {
-            throw new HttpException(400, "Invalid id");
-        }
+        $book = Book::findOrfail($id);
+        $book->delete();
 
-        (new Book)->find($id)->delete();
-
-        return response()->json([
-            'message' => 'book deleted',
-        ], 204);
+        return response()->json(null, 204);
     }
 }

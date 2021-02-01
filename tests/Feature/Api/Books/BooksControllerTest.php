@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Api\Books;
 
-use App\Book;
-use App\User;
+use App\Models\Book;
+use App\Models\User;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
@@ -12,76 +12,76 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class BooksControllerTest extends TestCase
 {
-    use WithoutMiddleware, RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->book = factory(Book::class)->create();
-        $this->user = factory(User::class)->create();
-    }
+    use WithoutMiddleware;
 
     public function testBooksIndex()
     {
+        $user = User::factory()->create();
+
         $response = $this->json('GET', route('books.index'), [], [], [], [
-            "HTTP_Authorization" => "Basic " . base64_encode($this->user->username . ":" . "password"),
-            "PHP_AUTH_USER" => $this->user->username,
+            "HTTP_Authorization" => "Basic {base64_encode({$user->username} ':password')}",
+            "PHP_AUTH_USER" => $user->username,
             "PHP_AUTH_PW" => "password"
         ])->assertStatus(200);
     }
 
     public function testBookShow()
     {
-        $response = $this->json('GET', route('books.show', $this->book), [], [], [], [
-            "HTTP_Authorization" => "Basic " . base64_encode($this->user->username . ":" . "password"),
-            "PHP_AUTH_USER" => $this->user->username,
+        $user = User::factory()->create();
+        $book = User::factory()->create();
+
+        $this->json('GET', route('books.show', $book->id), [], [], [], [
+            "HTTP_Authorization" => "Basic {base64_encode({$user->username} ':password')}",
+            "PHP_AUTH_USER" => "$user->username",
             "PHP_AUTH_PW" => "password"
         ])->assertStatus(200);
     }
 
     public function testBookStore()
     {
+        $user = User::factory()->create();
+
         $data = [
-            'title'  => $this->book->title,
-            'price' => $this->book->price,
-            'author' => $this->book->author,
-            'editor'=> $this->book->editor,
-            'updated_at' => $this->book->updated_at,
-            'created_at' => $this->book->created_at
+            'title' => "title #2",
+            'price' => "price #2",
+            'author' => "author #2",
+            'editor'=> "editor #2",
         ];
 
         $response = $this->json('POST', route('books.store'), $data, [], [], [
-            "HTTP_Authorization" => "Basic " . base64_encode($this->user->username . ":" . "password"),
-            "PHP_AUTH_USER" => $this->user->username,
+            "HTTP_Authorization" => "Basic {base64_encode({$user->username} ':password')}",
+            "PHP_AUTH_USER" => $user->username,
             "PHP_AUTH_PW" => "password"
         ])->assertStatus(201);
 	}
 
     public function testBookUpdate()
     {
-        $data = [
-            'id' => $this->book->id,
-            'title'  => $this->book->title,
-            'price' => $this->book->price,
-            'author' => $this->book->author,
-            'editor'=> $this->book->editor,
-            'updated_at' => $this->book->updated_at,
-            'created_at' => $this->book->created_at
-        ];
+        $user = User::factory()->create();
 
-        $this->json('PUT', route('books.update', $this->book->id), $data, [], [], [
-            "HTTP_Authorization" => "Basic " . base64_encode($this->user->username . ":" . "password"),
-            "PHP_AUTH_USER" => $this->user->username,
+        $data = [
+            'id' => 1,
+            'title' => "title #1 update",
+            'price' => "price #1 update",
+            'author' => "author #1 update",
+            'editor'=> "editor #1 update",
+        ];
+        
+        $this->json('PUT', route('books.update', 1), $data, [], [], [
+            "HTTP_Authorization" => "Basic {base64_encode({$user->username} ':password')}",
+            "PHP_AUTH_USER" => $user->username,
             "PHP_AUTH_PW" => "password"
         ])->assertStatus(200);
     }
 
     public function testBookDelete()
     {
-        $this->json('DELETE', route('books.destroy', $this->book), [], [], [], [
-            "HTTP_Authorization" => "Basic " . base64_encode($this->user->username . ":" . "password"),
-            "PHP_AUTH_USER" => $this->user->username,
+        $book = Book::factory()->create();
+        $user = User::factory()->create();
+
+        $this->json('DELETE', route('books.destroy', $book->id), [], [], [], [
+            "HTTP_Authorization" => "Basic {base64_encode({$user->username} ':password')}",
+            "PHP_AUTH_USER" => "$user->username",
             "PHP_AUTH_PW" => "password"
         ])->assertStatus(204);
     }
