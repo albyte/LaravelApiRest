@@ -7,7 +7,7 @@ docker-compose build
 docker-compose up -d
 ```
 
-## Install with Composer 
+## Install PHP library with Composer 
 
 ```bash
 docker-compose exec http composer install
@@ -31,14 +31,14 @@ docker-compose exec http php artisan key:generate
 docker-compose exec http php artisan migrate --seed
 ```
 
-## Access API
+## Access Sample API 
 http://localhost:8080/api/books
 
 ```text
 ID  tony_admin@laravel.com
 PW  admin
 ```
-## Output OpenAPI yaml file(Swagger)
+## Update OpenAPI yaml file(Swagger)
 
 ```bash
 docker-compose exec http php vendor/bin/openapi \

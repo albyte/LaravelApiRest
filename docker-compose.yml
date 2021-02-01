@@ -24,6 +24,6 @@ services:
     ports:
       - "8088:8080"
     volumes:
-      - ./docs/openapi.yaml:/usr/share/nginx/html/openapi.yaml
+      - ./docs/:/usr/share/nginx/html/api/
     environment:
-      API_URL: openapi.yaml
+      API_URL: api/openapi.yaml
